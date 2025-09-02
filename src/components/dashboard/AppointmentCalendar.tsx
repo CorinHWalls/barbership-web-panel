@@ -204,16 +204,20 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-xl font-bold">Appointments</CardTitle>
           <div className="flex items-center space-x-2">
-            <Tabs
-              value={view}
-              onValueChange={(v) => setView(v as "calendar" | "list")}
-              className="w-[200px]"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="calendar">Calendar</TabsTrigger>
-                <TabsTrigger value="list">List</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant={view === "calendar" ? "default" : "outline"}
+                onClick={() => setView("calendar")}
+              >
+                Calendar
+              </Button>
+              <Button
+                variant={view === "list" ? "default" : "outline"}
+                onClick={() => setView("list")}
+              >
+                List
+              </Button>
+            </div>
             <Button
               variant="outline"
               size="icon"
@@ -270,7 +274,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
               </div>
             </div>
 
-            <TabsContent value="calendar" className="mt-0">
+            {view === "calendar" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="col-span-1 md:col-span-2">
                   <div className="border rounded-md p-4 h-[400px] overflow-y-auto">
@@ -316,9 +320,9 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                   />
                 </div>
               </div>
-            </TabsContent>
+            )}
 
-            <TabsContent value="list" className="mt-0">
+            {view === "list" && (
               <div className="border rounded-md overflow-hidden">
                 <table className="w-full">
                   <thead>
@@ -364,7 +368,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                   </tbody>
                 </table>
               </div>
-            </TabsContent>
+            )}
           </div>
         </CardContent>
       </Card>

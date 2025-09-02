@@ -22,26 +22,61 @@ import {
   Users,
   LogOut,
   MonitorSmartphone,
+  UserPlus,
 } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+import InvitationCodeGenerator from "@/components/admin/InvitationCodeGenerator";
+import { useAuth } from "@/components/auth/AuthProvider";
+
 export default function DashboardLayout({
   children = <div className="p-6">Dashboard Content</div>,
 }: DashboardLayoutProps) {
   const [isKioskMode, setIsKioskMode] = useState(false);
+  const [activeView, setActiveView] = useState("dashboard");
   const pathname = usePathname();
+  const { profile } = useAuth();
+
+  // Check if user has admin or owner privileges
+  const isAdmin =
+    profile?.role && Array.isArray(profile.role)
+      ? profile.role.includes("admin") || profile.role.includes("owner")
+      : false;
+
+  const baseNavigation = [
+    { name: "Dashboard", href: "/", icon: Home, view: "dashboard" },
+    {
+      name: "Appointments",
+      href: "/appointments",
+      icon: Calendar,
+      view: "appointments",
+    },
+    { name: "Barbers", href: "/barbers", icon: Scissors, view: "barbers" },
+    { name: "Clients", href: "/clients", icon: Users, view: "clients" },
+    {
+      name: "Services",
+      href: "/services",
+      icon: ClipboardList,
+      view: "services",
+    },
+  ];
+
+  const adminNavigation = [
+    { name: "Invite Barber", href: "#", icon: UserPlus, view: "invite-barber" },
+  ];
+
+  const commonNavigation = [
+    { name: "Reports", href: "/reports", icon: BarChart3, view: "reports" },
+    { name: "Settings", href: "/settings", icon: Settings, view: "settings" },
+  ];
 
   const navigation = [
-    { name: "Dashboard", href: "/", icon: Home },
-    { name: "Appointments", href: "/appointments", icon: Calendar },
-    { name: "Barbers", href: "/barbers", icon: Scissors },
-    { name: "Clients", href: "/clients", icon: Users },
-    { name: "Services", href: "/services", icon: ClipboardList },
-    { name: "Reports", href: "/reports", icon: BarChart3 },
-    { name: "Settings", href: "/settings", icon: Settings },
+    ...baseNavigation,
+    ...(isAdmin ? adminNavigation : []),
+    ...commonNavigation,
   ];
 
   const handleModeToggle = () => {
@@ -59,11 +94,44 @@ export default function DashboardLayout({
           <div className="px-3 mt-6">
             <div className="space-y-1">
               {navigation.map((item) => {
-                const isActive = pathname === item.href;
-                return (
+                const isActive =
+                  activeView === item.view ||
+                  (item.view === "dashboard" && pathname === item.href);
+                const handleClick = (e: React.MouseEvent) => {
+                  if (item.view === "invite-barber") {
+                    e.preventDefault();
+                    setActiveView("invite-barber");
+                  } else {
+                    setActiveView(item.view);
+                  }
+                };
+
+                return item.view === "invite-barber" ? (
+                  <button
+                    key={item.name}
+                    onClick={handleClick}
+                    className={cn(
+                      "flex items-center px-3 py-2 text-sm font-medium rounded-md group w-full text-left",
+                      isActive
+                        ? "bg-red-900/50 text-red-500"
+                        : "text-zinc-300 hover:bg-zinc-800 hover:text-white",
+                    )}
+                  >
+                    <item.icon
+                      className={cn(
+                        "mr-3 h-5 w-5 flex-shrink-0",
+                        isActive
+                          ? "text-red-500"
+                          : "text-zinc-400 group-hover:text-zinc-300",
+                      )}
+                    />
+                    {item.name}
+                  </button>
+                ) : (
                   <Link
                     key={item.name}
                     href={item.href}
+                    onClick={handleClick}
                     className={cn(
                       "flex items-center px-3 py-2 text-sm font-medium rounded-md group",
                       isActive
@@ -142,11 +210,44 @@ export default function DashboardLayout({
           <div className="px-3 py-6">
             <div className="space-y-1">
               {navigation.map((item) => {
-                const isActive = pathname === item.href;
-                return (
+                const isActive =
+                  activeView === item.view ||
+                  (item.view === "dashboard" && pathname === item.href);
+                const handleClick = (e: React.MouseEvent) => {
+                  if (item.view === "invite-barber") {
+                    e.preventDefault();
+                    setActiveView("invite-barber");
+                  } else {
+                    setActiveView(item.view);
+                  }
+                };
+
+                return item.view === "invite-barber" ? (
+                  <button
+                    key={item.name}
+                    onClick={handleClick}
+                    className={cn(
+                      "flex items-center px-3 py-2 text-sm font-medium rounded-md group w-full text-left",
+                      isActive
+                        ? "bg-red-900/50 text-red-500"
+                        : "text-zinc-300 hover:bg-zinc-800 hover:text-white",
+                    )}
+                  >
+                    <item.icon
+                      className={cn(
+                        "mr-3 h-5 w-5 flex-shrink-0",
+                        isActive
+                          ? "text-red-500"
+                          : "text-zinc-400 group-hover:text-zinc-300",
+                      )}
+                    />
+                    {item.name}
+                  </button>
+                ) : (
                   <Link
                     key={item.name}
                     href={item.href}
+                    onClick={handleClick}
                     className={cn(
                       "flex items-center px-3 py-2 text-sm font-medium rounded-md group",
                       isActive
@@ -265,6 +366,22 @@ export default function DashboardLayout({
                 >
                   Return to Admin Mode
                 </Button>
+              </div>
+            </div>
+          ) : activeView === "invite-barber" ? (
+            <div className="p-4 md:p-6">
+              <div className="max-w-2xl mx-auto">
+                <div className="mb-6">
+                  <h1 className="text-2xl font-bold text-white mb-2">
+                    Invite Barber
+                  </h1>
+                  <p className="text-zinc-400">
+                    Generate invitation codes for new barbers to join your team.
+                  </p>
+                </div>
+                <div className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+                  <InvitationCodeGenerator className="w-full" />
+                </div>
               </div>
             </div>
           ) : (
